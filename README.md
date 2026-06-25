@@ -10,14 +10,22 @@ Every ~6 minutes, the script finds the Sober window, briefly brings it to focus,
 
 ---
 
+## Known limitation: focus stealing
+
+The focus restore isn't fully reliable — depending on your compositor, the previous window may not regain focus correctly after the spacebar is injected. The workaround is simple:
+
+**Run Sober in fullscreen.** When the script briefly activates the Sober window, your cursor stays over your other window. Fullscreen ensures Sober is actually visible and receives the keypress, while your compositor handles returning focus on its own. This is the recommended way to run the script.
+
+---
+
 ## Dependencies
 
 You need two tools installed before this does anything:
 
 | Tool | What it does | Install |
 |------|--------------|---------|
-| `kdotool` | Finds and focuses windows by name | `sudo apt install kdotool` |
-| `ydotool` + `ydotoold` | Injects keypresses at the kernel level | `sudo apt install ydotool` |
+| `kdotool` | Finds and focuses windows by name | `sudo dnf install kdotool` |
+| `ydotool` + `ydotoold` | Injects keypresses at the kernel level | `sudo dnf install ydotool` |
 
 > **Why ydotool?** Sober runs under XWayland or a native Wayland compositor. `xdotool` won't reach it. `ydotool` operates through `/dev/uinput` so it works regardless of your display server.
 
@@ -88,6 +96,8 @@ Run `kdotool search --name "Sober"` while Sober is open. If nothing comes back, 
 **Spacebar not registering**
 Check that `ydotoold` is running: `pgrep ydotoold`. If it's not, start it with `sudo ydotoold &`.
 
+Also make sure Sober is running in fullscreen — if it's windowed and focus doesn't land correctly, the keypress won't go through.
+
 **Permission denied on /dev/uinput**
 ```bash
 sudo chmod 660 /dev/uinput
@@ -99,6 +109,7 @@ Log out and back in after adding yourself to the group.
 
 ## Notes
 
-- Tested on KDE Plasma (Wayland). Should work on any compositor that `kdotool` supports.
+- Tested on KDE Plasma (Wayland) on Fedora. Should work on any compositor that `kdotool` supports.
 - The script doesn't move your mouse or do anything besides the single space keypress.
 - If Sober crashes or you close it mid-session, the script keeps running harmlessly and will pick it back up when you relaunch.
+- Focus restore after the jump is best-effort. Running Sober fullscreen is the reliable workaround until a cleaner solution exists.
